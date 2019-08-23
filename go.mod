@@ -5,6 +5,7 @@ go 1.12
 require (
 	github.com/aliyun/aliyun-oss-go-sdk v2.0.2+incompatible
 	github.com/baiyubin/aliyun-sts-go-sdk v0.0.0-20180326062324-cfa1a18b161f // indirect
+	github.com/denverdino/aliyungo v0.0.0-20190822085226-26b766f0dfd5
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/satori/go.uuid v1.2.0 // indirect
