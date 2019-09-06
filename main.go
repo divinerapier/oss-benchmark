@@ -1,13 +1,15 @@
 package main
 
 import (
-	"flag"
 	"time"
+
+	"github.com/divinerapier/oss-benchmark/args"
+	"github.com/divinerapier/oss-benchmark/downloader"
 )
 
 func main() {
-	flag.Parse()
-	downloader := NewDownloader(args)
-	go downloader.StatTicker(time.Duration(args.SampleInterval) * time.Millisecond)
-	downloader.Start()
+	arg := args.ParseArguments()
+	dl := downloader.NewDownloader(arg)
+	go dl.StatTicker(time.Duration(arg.SampleInterval) * time.Millisecond)
+	dl.Start()
 }

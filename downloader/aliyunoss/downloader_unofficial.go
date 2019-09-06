@@ -1,4 +1,4 @@
-package main
+package aliyunoss
 
 import (
 	"bufio"
@@ -12,35 +12,37 @@ import (
 	"time"
 
 	"github.com/denverdino/aliyungo/oss"
+	"github.com/divinerapier/oss-benchmark/args"
+	"github.com/divinerapier/oss-benchmark/stat"
 	"github.com/golang/glog"
 )
 
 type UnofficialDownloader struct {
-	args       Args
+	arg        args.Args
 	bucket     *oss.Bucket
 	objectList chan string
-	stat       Statistics
+	stat       stat.Statistics
 	wg         *sync.WaitGroup
 }
 
-func NewUnofficialDownloader(args Args) *UnofficialDownloader {
+func NewUnofficialDownloader(arg args.Args) *UnofficialDownloader {
 	var wg sync.WaitGroup
-	if err := args.Validate(); err != nil {
+	if err := arg.Validate(); err != nil {
 		panic(err)
 	}
 	objectList := make(chan string, 1024)
-	file, err := os.Open(args.InputFile)
+	file, err := os.Open(arg.InputFile)
 	if err != nil {
 		panic(err)
 	}
 
 	downloader := &UnofficialDownloader{
-		args:       args,
+		arg:        arg,
 		objectList: objectList,
 		wg:         &wg,
 	}
 
-	err = downloader.GetTestBucket(args)
+	err = downloader.GetTestBucket(arg)
 	if err != nil {
 		panic(err)
 	}
@@ -59,8 +61,8 @@ func NewUnofficialDownloader(args Args) *UnofficialDownloader {
 			if object == "" {
 				continue
 			}
-			if args.Prefix != "" {
-				object = filepath.Join(args.Prefix, object)
+			if arg.Prefix != "" {
+				object = filepath.Join(arg.Prefix, object)
 			}
 			objectList <- object
 		}
@@ -96,7 +98,7 @@ func (d *UnofficialDownloader) Start() {
 	d.stat.Start()
 	defer d.wg.Wait()
 	var wg sync.WaitGroup
-	for i := 0; i < d.args.Threads; i++ {
+	for i := 0; i < d.arg.Threads; i++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
@@ -117,11 +119,11 @@ func (d *UnofficialDownloader) Start() {
 }
 
 // GetTestBucket creates the test bucket
-func (d *UnofficialDownloader) GetTestBucket(args Args) error {
+func (d *UnofficialDownloader) GetTestBucket(arg args.Args) error {
 	// New client
-	client := oss.NewOSSClient(d.fromEndpoint(args.Endpoint), d.isInternal(args.Endpoint), args.AccessKey, args.SecretKey, false)
+	client := oss.NewOSSClient(d.fromEndpoint(arg.Endpoint), d.isInternal(arg.Endpoint), arg.AccessKey, arg.SecretKey, false)
 	// Get bucket
-	d.bucket = client.Bucket(args.Bucket)
+	d.bucket = client.Bucket(arg.Bucket)
 	return nil
 }
 

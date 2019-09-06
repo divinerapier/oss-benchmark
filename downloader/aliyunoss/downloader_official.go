@@ -1,4 +1,4 @@
-package main
+package aliyunoss
 
 import (
 	"bufio"
@@ -12,15 +12,17 @@ import (
 	"time"
 
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
+	"github.com/divinerapier/oss-benchmark/args"
+	"github.com/divinerapier/oss-benchmark/stat"
 	"github.com/golang/glog"
 )
 
 type OfficialDownloader struct {
-	args       Args
+	arg        args.Args
 	bucket     *oss.Bucket
 	objectList chan string
 	options    []oss.Option
-	stat       Statistics
+	stat       stat.Statistics
 	wg         *sync.WaitGroup
 }
 
@@ -45,25 +47,25 @@ func (s *OfficialDownloader) StatTicker(tick time.Duration) {
 	}
 }
 
-func NewOfficialDownloader(args Args, options ...oss.Option) *OfficialDownloader {
+func NewOfficialDownloader(arg args.Args, options ...oss.Option) *OfficialDownloader {
 	var wg sync.WaitGroup
-	if err := args.Validate(); err != nil {
+	if err := arg.Validate(); err != nil {
 		panic(err)
 	}
 	objectList := make(chan string, 1024)
-	file, err := os.Open(args.InputFile)
+	file, err := os.Open(arg.InputFile)
 	if err != nil {
 		panic(err)
 	}
 
 	downloader := &OfficialDownloader{
-		args:       args,
+		arg:        arg,
 		objectList: objectList,
 		options:    options,
 		wg:         &wg,
 	}
 
-	err = downloader.GetTestBucket(args)
+	err = downloader.GetTestBucket(arg)
 	if err != nil {
 		panic(err)
 	}
@@ -82,8 +84,8 @@ func NewOfficialDownloader(args Args, options ...oss.Option) *OfficialDownloader
 			if object == "" {
 				continue
 			}
-			if args.Prefix != "" {
-				object = filepath.Join(args.Prefix, object)
+			if arg.Prefix != "" {
+				object = filepath.Join(arg.Prefix, object)
 			}
 			objectList <- object
 		}
@@ -98,7 +100,7 @@ func (d *OfficialDownloader) Start() {
 	d.stat.Start()
 	defer d.wg.Wait()
 	var wg sync.WaitGroup
-	for i := 0; i < d.args.Threads; i++ {
+	for i := 0; i < d.arg.Threads; i++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
@@ -119,15 +121,15 @@ func (d *OfficialDownloader) Start() {
 }
 
 // GetTestBucket creates the test bucket
-func (d *OfficialDownloader) GetTestBucket(args Args) error {
+func (d *OfficialDownloader) GetTestBucket(arg args.Args) error {
 	// New client
-	client, err := oss.New(args.Endpoint, args.AccessKey, args.SecretKey)
+	client, err := oss.New(arg.Endpoint, arg.AccessKey, arg.SecretKey)
 	if err != nil {
 		return fmt.Errorf("connect to oss. error: %v", err)
 	}
 
 	// Get bucket
-	bucket, err := client.Bucket(args.Bucket)
+	bucket, err := client.Bucket(arg.Bucket)
 	if err != nil {
 		return fmt.Errorf("get bucket. error: %v", err)
 	}

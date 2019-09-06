@@ -1,4 +1,4 @@
-package main
+package args
 
 import (
 	"errors"
@@ -7,6 +7,8 @@ import (
 )
 
 type Args struct {
+	Provider       string
+	Region         string
 	Endpoint       string
 	AccessKey      string
 	SecretKey      string
@@ -41,6 +43,7 @@ var args Args
 
 func init() {
 	flag.StringVar(&args.Endpoint, "endpoint", "", "oss endpoint")
+	flag.StringVar(&args.Region, "region", "cn-north-1", "aws region")
 	flag.StringVar(&args.AccessKey, "access-key", "", "oss access key")
 	flag.StringVar(&args.SecretKey, "secret-key", "", "oss secret key")
 	flag.StringVar(&args.Bucket, "bucket", "", "oss bucket")
@@ -49,4 +52,12 @@ func init() {
 	flag.IntVar(&args.Threads, "thread", runtime.NumCPU(), "threads number")
 	flag.IntVar(&args.SampleInterval, "sample-interval", 1000, "sample interval in ms")
 	flag.BoolVar(&args.Official, "official", true, "use official oss sdk")
+}
+
+func ParseArguments() Args {
+	if flag.Parsed() {
+		return args
+	}
+	flag.Parse()
+	return args
 }

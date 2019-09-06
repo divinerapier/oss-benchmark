@@ -1,9 +1,11 @@
-package main
+package stat
 
 import (
 	"fmt"
 	"sync/atomic"
 	"time"
+
+	"github.com/divinerapier/oss-benchmark/size"
 )
 
 type Statistics struct {
@@ -63,13 +65,13 @@ func (s *Statistics) Stat() string {
 	return fmt.Sprintf(
 		`{"elapsed": %.2fs, "total_size": "%s", "total_count": %d, "speed": "%s/s", "success_size": "%s", "success_count": %d, "success_speed": "%s/s", "delta_count": %d, "delta_size": "%s"}`,
 		elapsed,
-		Size(totalSize).String(),
+		size.Size(totalSize).String(),
 		totalCount,
-		Size(speed).String(),
-		Size(successSize).String(),
+		size.Size(speed).String(),
+		size.Size(successSize).String(),
 		successCount,
-		Size(successSpeed).String(),
+		size.Size(successSpeed).String(),
 		totalCount-lastTotalCount,
-		Size(totalSize-lastTotalSize).String(),
+		size.Size(totalSize-lastTotalSize).String(),
 	)
 }
