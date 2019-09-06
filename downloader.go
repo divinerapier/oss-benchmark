@@ -6,6 +6,14 @@ import (
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 )
 
+type Provider string
+
+const (
+	AliOss = "ali-oss"
+	AwsS3  = "aws-s3"
+	CephS3 = "ceph-s3"
+)
+
 type Downloader interface {
 	StatTicker(time.Duration)
 	Start()
