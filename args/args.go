@@ -21,6 +21,9 @@ type Args struct {
 }
 
 func (a Args) Validate() error {
+	if a.Provider == "" {
+		return errors.New("missing provider")
+	}
 	if a.Endpoint == "" {
 		return errors.New("missing endpoint")
 	}
@@ -42,6 +45,7 @@ func (a Args) Validate() error {
 var args Args
 
 func init() {
+	flag.StringVar(&args.Provider, "provider", "", "service provider")
 	flag.StringVar(&args.Endpoint, "endpoint", "", "oss endpoint")
 	flag.StringVar(&args.Region, "region", "cn-north-1", "aws region")
 	flag.StringVar(&args.AccessKey, "access-key", "", "oss access key")
